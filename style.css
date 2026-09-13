@@ -1,0 +1,162 @@
+/* --- Base & Variables --- */
+:root {
+    --primary-color: #4CAF50;
+    --danger-color: #f44336;
+    --bg-color: #f4f4f9;
+    --text-color: #333;
+    --card-bg: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+/* --- Screen Management --- */
+.screen {
+    display: none;
+}
+.screen.active {
+    display: block;
+}
+
+/* --- Buttons --- */
+.btn-primary, .btn-logout {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    width: 100%;
+    margin-top: 10px;
+}
+.btn-primary { background-color: var(--primary-color); color: white; }
+.btn-logout { background-color: var(--danger-color); color: white; width: auto; padding: 8px 16px; }
+
+button:active { transform: scale(0.98); opacity: 0.9; }
+
+/* --- Login Screen --- */
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+}
+.login-container h1 { margin-bottom: 10px; }
+.login-container p { margin-bottom: 20px; color: #666; }
+.login-container input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* --- Student Dashboard --- */
+.student-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--card-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.user-info h2 { font-size: 1.2rem; }
+.user-info p { font-size: 0.9rem; color: #666; }
+
+.student-main {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.scanner-container {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+#reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.manual-entry {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+.manual-entry input {
+    width: 70%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+.manual-entry button {
+    width: auto;
+    margin-top: 0;
+    display: inline-block;
+}
+
+/* Feedback Area */
+.feedback {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    animation: fadeIn 0.3s ease-in-out;
+}
+.hidden { display: none; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Teacher Dashboard (Desktop Optimized) --- */
+.teacher-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: #333;
+    color: white;
+}
+.teacher-main {
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    .login-container { margin: 50px 20px; }
+    .manual-entry input { width: 100%; margin-bottom: 10px; margin-right: 0; }
+    .manual-entry button { width: 100%; }
+}

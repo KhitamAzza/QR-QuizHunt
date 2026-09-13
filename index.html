@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scavenger Hunt Quiz</title>
+    <!-- Link to our external CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+
+    <!-- ================= SCREEN 1: LOGIN ================= -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <h1>🕵️ Scavenger Hunt</h1>
+            <p>Enter your Password to begin</p>
+            <input type="password" id="password-input" placeholder="Your Password" autocomplete="off">
+            <button id="login-btn" class="btn-primary">Login</button>
+        </div>
+    </div>
+
+    <!-- ================= SCREEN 2: STUDENT DASHBOARD ================= -->
+    <div id="student-dashboard" class="screen">
+        <header class="student-header">
+            <div class="user-info">
+                <h2 id="display-name">Student</h2>
+                <p id="display-class">Class</p>
+            </div>
+            <button id="logout-btn" class="btn-logout">Logout</button>
+        </header>
+
+        <main class="student-main">
+            <div class="scanner-container">
+                <h3>Scan QR Code</h3>
+                <!-- The camera will render inside this div -->
+                <div id="reader"></div>
+                
+                <!-- Fallback for desktop/manual entry -->
+                <div class="manual-entry">
+                    <p>Or type Question ID manually:</p>
+                    <input type="text" id="manual-qr-input" placeholder="e.g., Q001">
+                    <button id="manual-submit-btn" class="btn-primary">Submit</button>
+                </div>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="feedback hidden">
+                <p id="feedback-text">Answer Recorded!</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= SCREEN 3: TEACHER DASHBOARD (Placeholder) ================= -->
+    <div id="teacher-dashboard" class="screen">
+        <header class="teacher-header">
+            <h1>Teacher Control Panel</h1>
+            <button id="teacher-logout-btn" class="btn-logout">Logout</button>
+        </header>
+        <main class="teacher-main">
+            <p>Scoreboard and student management will go here.</p>
+        </main>
+    </div>
+
+    <!-- Link to our external JS -->
+    <script src="script.js"></script>
+</body>
+</html>
