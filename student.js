@@ -4,6 +4,7 @@
 let html5QrcodeScanner = null;
 let currentQuestionId = null;
 let studentTimerInterval = null;
+let questionTimerInterval = null;
 
 const studentTimer = document.getElementById('student-timer');
 const scannerArea = document.getElementById('scanner-area');
@@ -15,6 +16,7 @@ const feedbackText = document.getElementById('feedback-text');
 const manualInput = document.getElementById('manual-qr-input');
 const manualSubmitBtn = document.getElementById('manual-submit-btn');
 const progressTracker = document.getElementById('progress-tracker');
+
 // --- TENSION TIMER CONFIG ---
 const RARITY_TIME_LIMITS = {
     mythic: 5000,     // 5 seconds (Panic!)
@@ -24,7 +26,6 @@ const RARITY_TIME_LIMITS = {
     common: 30000     // 30 seconds (Default)
 };
 
-let questionTimerInterval = null;
 // ==========================================
 // 2. GAME TIMER & STATUS
 // ==========================================
@@ -94,7 +95,7 @@ function onScanSuccess(decodedText) {
     loadQuestion(questionId);
 }
 
-function onScanFailure(error) { /* Ignore */ }
+function onScanFailure(error) { /* Ignore normal scan failures */ }
 
 manualSubmitBtn.addEventListener('click', () => {
     const qId = manualInput.value.trim();
@@ -129,13 +130,13 @@ async function loadQuestion(questionId) {
     qOptions.innerHTML = ''; 
     questionModal.classList.remove('hidden');
 
-            try {
+    try {
         const response = await fetch(`${FIREBASE_URL}/questions/${questionId}.json?auth=${FIREBASE_SECRET}`);
         const qData = await response.json();
 
         if (!qData || !qData.text) throw new Error("Question data is empty or ID is wrong");
 
-        // --- RARITY LOGIC (From previous step) ---
+        // --- RARITY LOGIC ---
         const rarity = qData.rarity ? qData.rarity.toLowerCase().trim() : 'common';
         questionModal.className = 'question-modal'; 
         questionModal.classList.add(`rarity-${rarity}`);
@@ -157,11 +158,8 @@ async function loadQuestion(questionId) {
             }
         });
 
-        // --- NEW: TENSION TIMER LOGIC ---
-        // 1. Get time limit for this rarity (default to 30s if missing)
+        // --- TENSION TIMER LOGIC ---
         const timeLimit = RARITY_TIME_LIMITS[rarity] || 30000;
-        
-        // 2. Inject Timer UI at the top of the modal
         const timerHTML = `
             <div class="question-timer-container">
                 <div class="question-timer-bar"></div>
@@ -169,8 +167,6 @@ async function loadQuestion(questionId) {
             </div>
         `;
         questionModal.insertAdjacentHTML('afterbegin', timerHTML);
-
-        // 3. Start the countdown!
         startQuestionTimer(timeLimit);
 
     } catch (error) {
@@ -181,14 +177,14 @@ async function loadQuestion(questionId) {
         qOptions.innerHTML = `<button class="option-btn" style="background-color:#f44336;" onclick="resetToScanner()">Go Back</button>`;
     }
 }
+
 // --- TENSION TIMER FUNCTIONS ---
 function startQuestionTimer(timeLimit) {
-    clearInterval(questionTimerInterval); // Clear any old timers
+    clearInterval(questionTimerInterval); 
     const startTime = Date.now();
     const timerBar = document.querySelector('.question-timer-bar');
     const timerText = document.querySelector('.question-timer-text');
 
-    // Update every 100ms for a smooth shrinking bar
     questionTimerInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         const remaining = timeLimit - elapsed;
@@ -198,39 +194,32 @@ function startQuestionTimer(timeLimit) {
             handleTimeUp();
         } else {
             const percent = (remaining / timeLimit) * 100;
-            
-            // Update UI
             if(timerBar) timerBar.style.width = percent + '%';
             if(timerText) timerText.textContent = Math.ceil(remaining / 1000) + 's';
 
-            // Change color based on tension (Green -> Orange -> Red)
             if (percent < 30) {
-                if(timerBar) timerBar.style.backgroundColor = '#f44336'; // Red
+                if(timerBar) timerBar.style.backgroundColor = '#f44336'; 
             } else if (percent < 60) {
-                if(timerBar) timerBar.style.backgroundColor = '#ff9800'; // Orange
+                if(timerBar) timerBar.style.backgroundColor = '#ff9800'; 
             }
         }
     }, 100);
 }
 
 function handleTimeUp() {
-    // 1. Hide question modal
     questionModal.classList.add('hidden');
-    
-    // 2. Show "Time's Up" feedback (Orange instead of Green)
     feedbackText.textContent = `⏰ Time's Up! Scan again to retry.`;
     feedbackArea.classList.remove('hidden');
     feedbackArea.style.backgroundColor = '#ff9800'; 
 
-    // 3. Return to scanner after 2 seconds
     setTimeout(() => {
         resetToScanner();
-        feedbackArea.style.backgroundColor = ''; // Reset to default green
+        feedbackArea.style.backgroundColor = ''; 
     }, 2000);
 }
 
 async function submitAnswer(selectedOption) {
-    clearInterval(questionTimerInterval);
+    clearInterval(questionTimerInterval); // Stop the tension timer
     if (!currentUser || !currentQuestionId) return;
     if (!isGameActive) { showGameOver(); return; }
 
@@ -254,14 +243,33 @@ async function submitAnswer(selectedOption) {
         });
         if (!response.ok) throw new Error("Network response was not ok");
 
+        // 1. Mark as answered locally
         currentUser.answeredQuestions.add(currentQuestionId);
 
+        // 2. Update Progress Tracker Live
+        try {
+            const qRes = await fetch(`${FIREBASE_URL}/questions/${currentQuestionId}.json?auth=${FIREBASE_SECRET}`);
+            const qData = await qRes.json();
+            if (qData && qData.rarity) {
+                const r = qData.rarity.toLowerCase().trim();
+                if (currentUser.answeredRarities[r] !== undefined) {
+                    currentUser.answeredRarities[r]++;
+                }
+            }
+        } catch(e) { /* ignore fetch error for tracker */ }
+        
+        updateProgressTracker(); // Refresh the UI bar
+
+        // 3. Show success feedback
         questionModal.classList.add('hidden');
         feedbackText.textContent = `✅ Answer for ${currentQuestionId} Recorded!`;
         feedbackArea.classList.remove('hidden');
+        feedbackArea.style.backgroundColor = ''; // Ensure it's green
 
         setTimeout(() => { resetToScanner(); }, 2000);
+
     } catch (error) {
+        console.error("Submission error:", error);
         qText.textContent = "❌ Failed to record. Tap to try again.";
         qOptions.innerHTML = `<button class="option-btn" onclick="loadQuestion('${currentQuestionId}')">Retry</button>`;
     }
@@ -273,10 +281,13 @@ function resetToScanner() {
     scannerArea.classList.remove('hidden');
     currentQuestionId = null;
     qText.style.color = "var(--text-color)";
-    if (html5QrcodeScanner) html5QrcodeScanner.resume();
     clearInterval(questionTimerInterval);
+    if (html5QrcodeScanner) html5QrcodeScanner.resume();
 }
-// --- PROGRESS TRACKER ---
+
+// ==========================================
+// 5. PROGRESS TRACKER
+// ==========================================
 function updateProgressTracker() {
     if (!currentUser || !progressTracker) return;
 
@@ -284,7 +295,7 @@ function updateProgressTracker() {
     const total = currentUser.totalQuestions;
     const percent = total > 0 ? (answered / total) * 100 : 0;
 
-    // Build rarity breakdown HTML (only show rarities they've touched)
+    // Build rarity breakdown HTML
     let rarityHTML = '';
     const rarityLabels = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic' };
     for (const [rarity, count] of Object.entries(currentUser.answeredRarities)) {
@@ -293,7 +304,6 @@ function updateProgressTracker() {
         }
     }
 
-    // Check if they've answered everything
     const isComplete = answered >= total && total > 0;
 
     progressTracker.innerHTML = `
