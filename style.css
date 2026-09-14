@@ -144,3 +144,35 @@ button:active { transform: scale(0.98); opacity: 0.9; }
     50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(244, 67, 54, 0.8); }
     100% { transform: scale(1); }
 }
+/* ==========================================
+   TENSION TIMER STYLES
+   ========================================== */
+.question-timer-container {
+    position: relative;
+    width: 100%;
+    height: 24px;
+    background-color: #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.question-timer-bar {
+    height: 100%;
+    width: 100%;
+    background-color: #4CAF50; /* Starts Green */
+    transition: width 0.1s linear, background-color 0.5s;
+}
+
+.question-timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 900;
+    font-size: 1rem;
+    color: #333;
+    text-shadow: 0 0 3px rgba(255,255,255,0.8);
+    font-family: monospace; /* Retro vibe */
+}

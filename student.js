@@ -14,7 +14,16 @@ const feedbackArea = document.getElementById('feedback-area');
 const feedbackText = document.getElementById('feedback-text');
 const manualInput = document.getElementById('manual-qr-input');
 const manualSubmitBtn = document.getElementById('manual-submit-btn');
+// --- TENSION TIMER CONFIG ---
+const RARITY_TIME_LIMITS = {
+    mythic: 5000,     // 5 seconds (Panic!)
+    legendary: 10000, // 10 seconds
+    epic: 15000,      // 15 seconds
+    rare: 20000,      // 20 seconds
+    common: 30000     // 30 seconds (Default)
+};
 
+let questionTimerInterval = null;
 // ==========================================
 // 2. GAME TIMER & STATUS
 // ==========================================
@@ -119,29 +128,22 @@ async function loadQuestion(questionId) {
     qOptions.innerHTML = ''; 
     questionModal.classList.remove('hidden');
 
-        try {
+            try {
         const response = await fetch(`${FIREBASE_URL}/questions/${questionId}.json?auth=${FIREBASE_SECRET}`);
         const qData = await response.json();
 
         if (!qData || !qData.text) throw new Error("Question data is empty or ID is wrong");
 
-        // --- NEW: RARITY LOGIC ---
-        // 1. Get rarity (default to 'common' if column is empty in Sheet)
+        // --- RARITY LOGIC (From previous step) ---
         const rarity = qData.rarity ? qData.rarity.toLowerCase().trim() : 'common';
-        
-        // 2. Reset the modal classes to remove any previous rarity styling
         questionModal.className = 'question-modal'; 
-        
-        // 3. Apply the new rarity class (e.g., 'rarity-legendary')
         questionModal.classList.add(`rarity-${rarity}`);
 
-        // 4. Render the Question Text with the Rarity Badge injected at the top
         const badgeHTML = `<div class="rarity-badge">${rarity}</div>`;
         qText.innerHTML = badgeHTML + qData.text; 
-        qText.style.color = "var(--text-color)"; // Ensure text color resets
+        qText.style.color = "var(--text-color)"; 
         
-        // --- END RARITY LOGIC ---
-
+        // --- RENDER OPTIONS ---
         qOptions.innerHTML = ''; 
         const labels = ['A', 'B', 'C', 'D'];
         qData.options.forEach((opt, index) => {
@@ -153,18 +155,81 @@ async function loadQuestion(questionId) {
                 qOptions.appendChild(btn);
             }
         });
+
+        // --- NEW: TENSION TIMER LOGIC ---
+        // 1. Get time limit for this rarity (default to 30s if missing)
+        const timeLimit = RARITY_TIME_LIMITS[rarity] || 30000;
+        
+        // 2. Inject Timer UI at the top of the modal
+        const timerHTML = `
+            <div class="question-timer-container">
+                <div class="question-timer-bar"></div>
+                <span class="question-timer-text">${timeLimit / 1000}s</span>
+            </div>
+        `;
+        questionModal.insertAdjacentHTML('afterbegin', timerHTML);
+
+        // 3. Start the countdown!
+        startQuestionTimer(timeLimit);
+
     } catch (error) {
         console.error("Error loading question:", error);
-        // Reset modal class on error so it doesn't stay glowing red/gold
         questionModal.className = 'question-modal'; 
-        
         qText.innerHTML = `❌ Error: Question "${questionId}" not found!`;
         qText.style.color = "red";
         qOptions.innerHTML = `<button class="option-btn" style="background-color:#f44336;" onclick="resetToScanner()">Go Back</button>`;
     }
 }
+// --- TENSION TIMER FUNCTIONS ---
+function startQuestionTimer(timeLimit) {
+    clearInterval(questionTimerInterval); // Clear any old timers
+    const startTime = Date.now();
+    const timerBar = document.querySelector('.question-timer-bar');
+    const timerText = document.querySelector('.question-timer-text');
+
+    // Update every 100ms for a smooth shrinking bar
+    questionTimerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = timeLimit - elapsed;
+
+        if (remaining <= 0) {
+            clearInterval(questionTimerInterval);
+            handleTimeUp();
+        } else {
+            const percent = (remaining / timeLimit) * 100;
+            
+            // Update UI
+            if(timerBar) timerBar.style.width = percent + '%';
+            if(timerText) timerText.textContent = Math.ceil(remaining / 1000) + 's';
+
+            // Change color based on tension (Green -> Orange -> Red)
+            if (percent < 30) {
+                if(timerBar) timerBar.style.backgroundColor = '#f44336'; // Red
+            } else if (percent < 60) {
+                if(timerBar) timerBar.style.backgroundColor = '#ff9800'; // Orange
+            }
+        }
+    }, 100);
+}
+
+function handleTimeUp() {
+    // 1. Hide question modal
+    questionModal.classList.add('hidden');
+    
+    // 2. Show "Time's Up" feedback (Orange instead of Green)
+    feedbackText.textContent = `⏰ Time's Up! Scan again to retry.`;
+    feedbackArea.classList.remove('hidden');
+    feedbackArea.style.backgroundColor = '#ff9800'; 
+
+    // 3. Return to scanner after 2 seconds
+    setTimeout(() => {
+        resetToScanner();
+        feedbackArea.style.backgroundColor = ''; // Reset to default green
+    }, 2000);
+}
 
 async function submitAnswer(selectedOption) {
+    clearInterval(questionTimerInterval);
     if (!currentUser || !currentQuestionId) return;
     if (!isGameActive) { showGameOver(); return; }
 
@@ -208,4 +273,5 @@ function resetToScanner() {
     currentQuestionId = null;
     qText.style.color = "var(--text-color)";
     if (html5QrcodeScanner) html5QrcodeScanner.resume();
+    clearInterval(questionTimerInterval);
 }
