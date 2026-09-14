@@ -74,52 +74,37 @@ loginBtn.addEventListener('click', async () => {
                 class: studentData.class,
                 answeredQuestions: new Set() 
             };
-            
+
             // Fetch past submissions to prevent duplicate answers
-const subsRes = await fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`);
-const allSubs = await subsRes.json();
-if (allSubs) {
-    Object.values(allSubs).forEach(sub => {
-        if (sub.student_password === currentUser.password) {
-            currentUser.answeredQuestions.add(sub.question_id);
-        }
-        // Update rarity count
-// We need to know the rarity of the question we just answered
-// Fetch it quickly (it's cached by the browser from loadQuestion)
-try {
-    const qRes = await fetch(`${FIREBASE_URL}/questions/${currentQuestionId}.json?auth=${FIREBASE_SECRET}`);
-    const qData = await qRes.json();
-    if (qData && qData.rarity) {
-        const r = qData.rarity.toLowerCase().trim();
-        if (currentUser.answeredRarities[r] !== undefined) {
-            currentUser.answeredRarities[r]++;
-        }
-    }
-} catch(e) { /* ignore */ }
-
-updateProgressTracker();
-    });
-}
-
-// NEW: Fetch total questions and build rarity breakdown of answered ones
-const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
-const allQuestions = await questionsRes.json();
-currentUser.totalQuestions = allQuestions ? Object.keys(allQuestions).length : 0;
-
-// Track which rarities they've answered
-currentUser.answeredRarities = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
-if (allQuestions && allSubs) {
-    Object.values(allSubs).forEach(sub => {
-        if (sub.student_password === currentUser.password && allQuestions[sub.question_id]) {
-            const rarity = allQuestions[sub.question_id].rarity 
-                ? allQuestions[sub.question_id].rarity.toLowerCase().trim() 
-                : 'common';
-            if (currentUser.answeredRarities[rarity] !== undefined) {
-                currentUser.answeredRarities[rarity]++;
+            const subsRes = await fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`);
+            const allSubs = await subsRes.json();
+            if (allSubs) {
+                Object.values(allSubs).forEach(sub => {
+                    if (sub.student_password === currentUser.password) {
+                        currentUser.answeredQuestions.add(sub.question_id);
+                    }
+                });
             }
-        }
-    });
-}
+
+            // Fetch total questions and build rarity breakdown of answered ones
+            const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
+            const allQuestions = await questionsRes.json();
+            currentUser.totalQuestions = allQuestions ? Object.keys(allQuestions).length : 0;
+
+            // Track which rarities they've answered
+            currentUser.answeredRarities = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
+            if (allQuestions && allSubs) {
+                Object.values(allSubs).forEach(sub => {
+                    if (sub.student_password === currentUser.password && allQuestions[sub.question_id]) {
+                        const rarity = allQuestions[sub.question_id].rarity 
+                            ? allQuestions[sub.question_id].rarity.toLowerCase().trim() 
+                            : 'common';
+                        if (currentUser.answeredRarities[rarity] !== undefined) {
+                            currentUser.answeredRarities[rarity]++;
+                        }
+                    }
+                });
+            }
 
             displayName.textContent = currentUser.name;
             displayClass.textContent = currentUser.class;
