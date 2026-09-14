@@ -14,6 +14,7 @@ const feedbackArea = document.getElementById('feedback-area');
 const feedbackText = document.getElementById('feedback-text');
 const manualInput = document.getElementById('manual-qr-input');
 const manualSubmitBtn = document.getElementById('manual-submit-btn');
+const progressTracker = document.getElementById('progress-tracker');
 // --- TENSION TIMER CONFIG ---
 const RARITY_TIME_LIMITS = {
     mythic: 5000,     // 5 seconds (Panic!)
@@ -274,4 +275,36 @@ function resetToScanner() {
     qText.style.color = "var(--text-color)";
     if (html5QrcodeScanner) html5QrcodeScanner.resume();
     clearInterval(questionTimerInterval);
+}
+// --- PROGRESS TRACKER ---
+function updateProgressTracker() {
+    if (!currentUser || !progressTracker) return;
+
+    const answered = currentUser.answeredQuestions.size;
+    const total = currentUser.totalQuestions;
+    const percent = total > 0 ? (answered / total) * 100 : 0;
+
+    // Build rarity breakdown HTML (only show rarities they've touched)
+    let rarityHTML = '';
+    const rarityLabels = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic' };
+    for (const [rarity, count] of Object.entries(currentUser.answeredRarities)) {
+        if (count > 0) {
+            rarityHTML += `<span class="rarity-dot ${rarity}">${count} ${rarityLabels[rarity]}</span>`;
+        }
+    }
+
+    // Check if they've answered everything
+    const isComplete = answered >= total && total > 0;
+
+    progressTracker.innerHTML = `
+        <div class="progress-header">
+            <span>📋 Quest Progress</span>
+            <span>${answered} / ${total} Questions</span>
+        </div>
+        <div class="progress-bar-container ${isComplete ? 'progress-complete' : ''}">
+            <div class="progress-bar-fill" style="width: ${percent}%"></div>
+        </div>
+        ${rarityHTML ? `<div class="progress-rarity-breakdown">${rarityHTML}</div>` : ''}
+        ${isComplete ? '<div style="text-align:center; font-weight:bold; color:#FFD700; margin-top:5px;">🏆 ALL QUESTIONS COMPLETE!</div>' : ''}
+    `;
 }
