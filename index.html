@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scavenger Hunt Quiz</title>
-    <!-- Link to our external CSS -->
     <link rel="stylesheet" href="style.css">
-    
-    <!-- QR Code Scanner Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
 
-    <!-- ================= SCREEN 1: LOGIN ================= -->
+    <!-- SCREEN 1: LOGIN -->
     <div id="login-screen" class="screen active">
         <div class="login-container">
             <h1>🕵️ Scavenger Hunt</h1>
@@ -22,23 +19,23 @@
         </div>
     </div>
 
-    <!-- ================= SCREEN 2: STUDENT DASHBOARD ================= -->
+    <!-- SCREEN 2: STUDENT DASHBOARD -->
     <div id="student-dashboard" class="screen">
         <header class="student-header">
             <div class="user-info">
                 <h2 id="display-name">Student</h2>
                 <p id="display-class">Class</p>
             </div>
+            <!-- NEW: Timer Display -->
+            <div class="timer-badge" id="student-timer">⏳ --:--</div>
             <button id="logout-btn" class="btn-logout">Logout</button>
         </header>
 
         <main class="student-main">
-            <div class="scanner-container">
+            <!-- Scanner Area -->
+            <div class="scanner-container" id="scanner-area">
                 <h3>Scan QR Code</h3>
-                <!-- The camera will render inside this div -->
                 <div id="reader"></div>
-                
-                <!-- Fallback for desktop/manual entry -->
                 <div class="manual-entry">
                     <p>Or type Question ID manually:</p>
                     <input type="text" id="manual-qr-input" placeholder="e.g., Q001">
@@ -46,25 +43,70 @@
                 </div>
             </div>
 
+            <!-- Question Modal -->
+            <div id="question-modal" class="question-modal hidden">
+                <h3 id="q-text">Question goes here?</h3>
+                <div class="options-grid" id="q-options"></div>
+            </div>
+
             <!-- Feedback Area -->
             <div id="feedback-area" class="feedback hidden">
                 <p id="feedback-text">Answer Recorded!</p>
-            </div>
+            </div
         </main>
     </div>
 
-    <!-- ================= SCREEN 3: TEACHER DASHBOARD (Placeholder) ================= -->
+    <!-- NEW: Student Game Over Overlay -->
+    <div id="game-over-overlay" class="game-over-overlay hidden">
+        <h1>🏁 Game Over!</h1>
+        <p>The time limit has been reached or the teacher has ended the game.</p>
+        <button id="game-over-logout-btn" class="btn-primary">Return to Login</button>
+    </div>
+
+    <!-- SCREEN 3: TEACHER DASHBOARD -->
     <div id="teacher-dashboard" class="screen">
         <header class="teacher-header">
             <h1>Teacher Control Panel</h1>
             <button id="teacher-logout-btn" class="btn-logout">Logout</button>
         </header>
         <main class="teacher-main">
-            <p>Scoreboard and student management will go here.</p>
+            <div class="control-panel">
+                <h2>⏱️ Game Controls</h2>
+                <div class="control-row">
+                    <label>Duration (minutes):</label>
+                    <input type="number" id="game-duration" value="60" min="1">
+                    <button id="start-game-btn" class="btn-primary" style="width:auto; margin-top:0;">Start Game</button>
+                    <button id="stop-game-btn" class="btn-logout" style="width:auto; margin-top:0;">End Game Early</button>
+                    <button id="purge-submissions-btn" class="btn-logout" style="background-color: #ff9800; width:auto; margin-top:0;">🗑️ Clear All Answers</button>
+                </div>
+                <p id="game-status-text" style="margin-top: 10px; font-weight: bold; color: #666;">Status: Checking...</p>
+            </div>
+
+            <div class="leaderboard-panel">
+                <h2>🏆 Live Leaderboard <button id="refresh-scores-btn" class="btn-primary" style="width:auto; padding: 8px 16px; font-size: 14px;">Refresh</button></h2>
+                <div class="table-container">
+                    <table id="leaderboard-table">
+                        <thead>
+    <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Class</th>
+        <th>Raw Score</th>
+        <th>Final Grade</th>
+        <th>Arcade Rank</th>
+    </tr>
+</thead>
+                        <tbody id="leaderboard-body">
+                            <tr><td colspan="5">Loading scores...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Link to our external JS -->
-    <script src="script.js"></script>
+    <script src="core.js"></script>
+    <script src="teacher.js"></script>
+    <script src="student.js"></script>
 </body>
 </html>
