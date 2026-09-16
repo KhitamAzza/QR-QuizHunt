@@ -287,7 +287,7 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 }
 
 .chest-container { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.chest-sprite { width: 300px; height: auto; image-rendering: pixelated; z-index: 2; cursor: pointer; transition: transform 0.2s ease; }
+.chest-sprite { width: 250px; height: auto; image-rendering: pixelated; z-index: 2; cursor: pointer; transition: transform 0.2s ease; }
 .chest-sprite:hover { transform: scale(1.05); }
 
 .chest-glow-effect { animation: retro-pulse 1s infinite alternate; }
@@ -345,22 +345,23 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 }
 
 /* 3. Ensure Instruction doesn't cause jumps either */
-.retro-instruction {
-    min-height: 2em; 
-    margin-top: 10px;
+/* ==========================================
+   FIX: CHEST INSTRUCTION POSITIONING
+   ========================================== */
+.chest-container .retro-instruction {
+    position: relative; /* Changes from absolute to normal flow */
+    bottom: auto;
+    left: auto;
+    transform: none;    /* Removes the old centering hacks */
+    margin-top: 20px;   /* Adds breathing room below the chest */
 }
-.folded-scroll-sprite { width: 320px; height: auto; image-rendering: pixelated; cursor: pointer; animation: floatScroll 2s ease-in-out infinite; }
+.folded-scroll-sprite { width: 300px; height: auto; image-rendering: pixelated; cursor: pointer; animation: floatScroll 2s ease-in-out infinite; }
 @keyframes floatScroll { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
 .parchment-bg { width: 100%; max-width: 530px; height: auto; image-rendering: pixelated; animation: unrollScroll 0.4s ease-out; }
 @keyframes unrollScroll { 0% { transform: scaleY(0); opacity: 0; } 100% { transform: scaleY(1); opacity: 1; } }
 
-.retro-instruction {
-    position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%);
-    color: var(--primary-color); font-size: 1.5rem; font-weight: bold;
-    font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000;
-    animation: pulse 1s ease-in-out infinite; cursor: pointer; z-index: 10; pointer-events: auto;
-}
+
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
 .screen-flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; pointer-events: none; }
@@ -393,12 +394,12 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 }
 .parchment-content .option-btn:hover { background: var(--ink-color); color: #ead9ad; }
 .parchment-content h3 {
-    color: var(--ink-color); font-size: 1.1rem; margin: 10px 0; line-height: 1.35;
+    color: var(--ink-color); font-size: 0.9rem; margin: 10px 0; line-height: 1.35;
     font-family: 'IM Fell English', Georgia, serif; text-align: center; font-weight: bold;
 }
 .parchment-rarity-badge {
     display: inline-block; padding: 6px 16px; background: var(--danger-color); color: #fff;
-    font-weight: bold; font-size: 1.2rem; border: 3px solid var(--ink-color);
+    font-weight: bold; font-size: 0.9rem; border: 3px solid var(--ink-color);
     text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px;
 }
 .parchment-timer-container { position: relative; width: 80%; height: 14px; background: #d8c496; border: 2px solid var(--ink-color); margin-bottom: 10px; }
@@ -408,7 +409,7 @@ button:active { transform: scale(0.98); opacity: 0.9; }
     color: var(--ink-color); font-weight: 900; font-size: 0.7rem; font-family: monospace;
 }
 .parchment-content h3.time-up-text {
-    font-size: 2.2rem; color: var(--danger-color) !important; text-shadow: 2px 2px 0 #000;
+    font-size: 1.5rem; color: var(--danger-color) !important; text-shadow: 2px 2px 0 #000;
     margin-top: 30px; margin-bottom: 30px; letter-spacing: 2px;
 }
 
@@ -488,3 +489,26 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 .stat-box { background: #14100b; padding: 15px; border-radius: 6px; flex: 1; border: 2px solid var(--card-border); }
 .stat-box h3 { font-size: 0.8rem; color: var(--text-color); opacity: 0.7; margin-bottom: 5px; text-transform: uppercase; }
 .stat-box p { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin: 0; }
+/* ==========================================
+   FIX: SCROLL & PARCHMENT INSTRUCTION POSITION
+   ========================================== */
+
+/* 1. Force the overlays to stack items vertically (Image on top, Text on bottom) */
+.scroll-overlay, .parchment-overlay {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; /* Centers the items horizontally */
+    justify-content: center;
+}
+
+/* 2. Change the instruction from "floating" to "flowing" */
+.scroll-overlay .retro-instruction,
+.parchment-overlay .retro-instruction {
+    position: relative; /* Takes it out of absolute positioning */
+    bottom: auto;
+    left: auto;
+    transform: none;    /* Removes the old centering hacks */
+    margin-top: 20px;   /* Adds breathing room below the image */
+    text-align: center;
+    width: 100%;
+}
