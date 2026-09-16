@@ -55,16 +55,16 @@ async function checkTeacherGameStatus() {
             const now = Date.now();
             if (now < settings.endTime) {
                 const minsLeft = Math.ceil((settings.endTime - now) / 60000);
-                gameStatusText.textContent = `🟢 Game is ACTIVE. Time remaining: ~${minsLeft} mins.`;
+                gameStatusText.textContent = `🟢 Game Berjalan. Time remaining: ~${minsLeft} mins.`;
                 gameStatusText.style.color = "green";
                 isGameActive = true;
             } else {
-                gameStatusText.textContent = `🔴 Game ENDED (Time expired).`;
+                gameStatusText.textContent = `🔴 Game berakhir (Waktu habis).`;
                 gameStatusText.style.color = "red";
                 isGameActive = false;
             }
         } else {
-            gameStatusText.textContent = `🔴 Game is STOPPED.`;
+            gameStatusText.textContent = `🔴 Game berhenti.`;
             gameStatusText.style.color = "red";
             isGameActive = false;
         }
@@ -171,11 +171,11 @@ async function calculateAndRenderLeaderboard() {
         // 4. Calculate Ranks
         const leaderboard = Object.values(scores).map(s => {
             const percentage = (s.rawScore / maxPossibleScore) * 100;
-            let rank = "💀 F-Rank";
-            if (percentage >= 90) rank = "🏆 S-Rank";
-            else if (percentage >= 80) rank = "🥇 A-Rank";
-            else if (percentage >= 70) rank = " B-Rank";
-            else if (percentage >= 60) rank = "🥉 C-Rank";
+            let rank = "Parah";
+            if (percentage >= 90) rank = "🏆 Super";
+            else if (percentage >= 80) rank = "A-Rank";
+            else if (percentage >= 70) rank = "B-Rank";
+            else if (percentage >= 60) rank = "C-Rank";
             return { ...s, questionsAnswered: s.questionsAnswered.size, percentage: percentage.toFixed(1), rank: rank };
         }).sort((a, b) => b.rawScore - a.rawScore);
 
@@ -187,7 +187,7 @@ async function calculateAndRenderLeaderboard() {
 
         // 6. Render
         if (leaderboard.length === 0) {
-            leaderboardBody.innerHTML = "<tr><td colspan='6'>No students found.</td></tr>";
+            leaderboardBody.innerHTML = "<tr><td colspan='6'>tidak ada siswa.</td></tr>";
             return;
         }
         leaderboardBody.innerHTML = leaderboard.map((s, i) => `
@@ -210,7 +210,7 @@ async function calculateAndRenderLeaderboard() {
 // ==========================================
 if (exportSheetsBtn) {
     exportSheetsBtn.addEventListener('click', async () => {
-        if (currentLeaderboardData.length === 0) return alert("No data to export! Refresh scores first.");
+        if (currentLeaderboardData.length === 0) return alert("Tidak ada data untuk export, refresh dulu.");
         const sessionName = prompt("Export name:", "Quiz Session");
         if (!sessionName) return;
         exportSheetsBtn.textContent = "Exporting..."; exportSheetsBtn.disabled = true;
@@ -236,6 +236,6 @@ if (purgeSubmissionsBtn) {
             ]);
             alert("✅ Answers & announcements cleared!"); calculateAndRenderLeaderboard();
         } catch (error) { alert("❌ Failed to clear."); }
-        finally { purgeSubmissionsBtn.textContent = "🗑️ Clear All Answers"; purgeSubmissionsBtn.disabled = false; }
+        finally { purgeSubmissionsBtn.textContent = "Hapus semua jawaban"; purgeSubmissionsBtn.disabled = false; }
     });
 }

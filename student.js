@@ -34,13 +34,17 @@ const parchmentOverlay = document.getElementById('parchment-overlay');
 
 const RARITY_TIME_LIMITS = { mythic: 5000, legendary: 10000, epic: 15000, rare: 20000, common: 30000 };
 const CHEST_SUSPENSE_PHRASES = [
-    "Are you dare to open this chest?",
-    "This might contain a surprise...",
-    "Hold on, it maybe a trap!",
-    "Fortune favors the bold...",
-    "What lies within?",
-    "Do you feel lucky, student?",
-    "Greed is a dangerous thing..."
+    "Berani buka kotak ini?",
+    "Tunggu sebentar... apakah ini bomb?",
+    "Buka saja, mungkin ada harta karun!",
+    "Yang berani, yang menang!",
+    "COba tebak, apa isinya?",
+    "Apa ini? Harta atau bencana?",
+    "Jangan rakus, pikirkan dulu!",
+    "Hati-hati, kotak ini misterius!",
+    "ayo berdoa, semoga beruntung!",
+    "Mungkin ini kotak ajaib!",
+    "Mungkin saja kotak ini berisi ijazah beliau"
 ];
 // ==========================================
 // 2. GAME TIMER & STATUS
