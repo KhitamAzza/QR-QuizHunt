@@ -358,7 +358,7 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 .folded-scroll-sprite { width: 300px; height: auto; image-rendering: pixelated; cursor: pointer; animation: floatScroll 2s ease-in-out infinite; }
 @keyframes floatScroll { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-.parchment-bg { width: 100%; max-width: 530px; height: auto; image-rendering: pixelated; animation: unrollScroll 0.4s ease-out; }
+.parchment-bg { width: 100%; max-width: 530px; height: 700px; image-rendering: pixelated; animation: unrollScroll 0.4s ease-out; }
 @keyframes unrollScroll { 0% { transform: scaleY(0); opacity: 0; } 100% { transform: scaleY(1); opacity: 1; } }
 
 
