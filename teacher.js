@@ -122,7 +122,7 @@ async function calculateAndRenderLeaderboard() {
         let maxPossibleScore = 0;
         for (const qId in questions) {
             const q = questions[qId];
-            if (q && q.chest_type === 'bomb') continue; 
+            if (q && (q.chest_type === 'bomb' || q.chest_type === 'hint')) continue; // Hints are worth 0, never count toward the max score
             const rarity = q.rarity ? q.rarity.toLowerCase().trim() : 'common';
             maxPossibleScore += (RARITY_POINTS[rarity] || 10);
         }
@@ -151,6 +151,9 @@ async function calculateAndRenderLeaderboard() {
                 }
                 return;
             }
+
+            // Hint chests award no points and shouldn't affect scoring
+            if (question && question.chest_type === 'hint') return;
 
             // Skip orphaned submissions that no longer point to a real question
             if (!question) return;

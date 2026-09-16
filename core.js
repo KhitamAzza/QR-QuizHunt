@@ -1,10 +1,8 @@
 // ==========================================
 // 1. CONFIGURATION & GLOBAL STATE
 // ==========================================
-const FIREBASE_URL = 'https://qr-codehunt-default-rtdb.asia-southeast1.firebasedatabase.app'; 
-const FIREBASE_SECRET = 'yhqWJQqmv7KY1gAGBUubYbbwaQtfnV3kjYR1hSIK'; 
-
-// Global state shared across modules
+const FIREBASE_URL = 'https://qr-codehunt-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FIREBASE_SECRET = 'yhqWJQqmv7KY1gAGBUubYbbwaQtfnV3kjYR1hSIK';
 let currentUser = null;
 let isGameActive = false;
 
@@ -15,13 +13,11 @@ const loginScreen = document.getElementById('login-screen');
 const studentDashboard = document.getElementById('student-dashboard');
 const teacherDashboard = document.getElementById('teacher-dashboard');
 const gameOverOverlay = document.getElementById('game-over-overlay');
-
 const passwordInput = document.getElementById('password-input');
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const teacherLogoutBtn = document.getElementById('teacher-logout-btn');
 const gameOverLogoutBtn = document.getElementById('game-over-logout-btn');
-
 const displayName = document.getElementById('display-name');
 const displayClass = document.getElementById('display-class');
 
@@ -36,11 +32,10 @@ function showScreen(screenElement) {
 
 function showGameOver() {
     gameOverOverlay.classList.remove('hidden');
-    // Clean up student specific intervals/scanners if they exist
     if (window.html5QrcodeScanner) {
-        window.html5QrcodeScanner.stop().then(() => { 
-            window.html5QrcodeScanner.clear(); 
-            window.html5QrcodeScanner = null; 
+        window.html5QrcodeScanner.stop().then(() => {
+            window.html5QrcodeScanner.clear();
+            window.html5QrcodeScanner = null;
         }).catch(err => console.log(err));
     }
     if (window.studentTimerInterval) clearInterval(window.studentTimerInterval);
@@ -56,7 +51,7 @@ loginBtn.addEventListener('click', async () => {
     // Teacher Route
     if (password.toLowerCase() === 'admin') {
         showScreen(teacherDashboard);
-        loadTeacherDashboard(); // Function defined in teacher.js
+        loadTeacherDashboard(); 
         passwordInput.value = '';
         return;
     }
@@ -66,7 +61,7 @@ loginBtn.addEventListener('click', async () => {
     try {
         const response = await fetch(`${FIREBASE_URL}/students/${password}.json?auth=${FIREBASE_SECRET}`);
         const studentData = await response.json();
-
+        
         if (studentData && studentData.name) {
             currentUser = { 
                 password, 
@@ -75,121 +70,84 @@ loginBtn.addEventListener('click', async () => {
                 answeredQuestions: new Set() 
             };
 
-                    // Fetch past submissions to prevent duplicate answers AND count global uses
-         const subsRes = await fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`);
-         const allSubs = await subsRes.json();
-         
-         // 1. Initialize the global tracker
-         currentUser.globalQuestionUses = {};
-
-         if (allSubs) {
-             Object.values(allSubs).forEach(sub => {
-                 // Track what THIS specific student has answered
-                 if (sub.student_password === currentUser.password) {
-                     currentUser.answeredQuestions.add(sub.question_id);
-                 }
-                 
-                 // Track how many times EACH question has been used globally
-                 const qId = sub.question_id;
-                 currentUser.globalQuestionUses[qId] = (currentUser.globalQuestionUses[qId] || 0) + 1;
-             });
-         }
-
-                    // Fetch total questions and build rarity breakdown of answered ones
-        const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
-        const allQuestions = await questionsRes.json();
-        currentUser.totalQuestions = allQuestions ? Object.keys(allQuestions).length : 0;
-        
-        // --- NEW: Store max_uses for every question ---
-        currentUser.questionMaxUses = {};
-        if (allQuestions) {
-            for (const [qId, q] of Object.entries(allQuestions)) {
-                currentUser.questionMaxUses[qId] = q.max_uses || 99;
-            }
-        }
-
-        // Track which rarities they've answered
-        currentUser.answeredRarities = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
-        if (allQuestions && allSubs) {
-            Object.values(allSubs).forEach(sub => {
-                if (sub.student_password === currentUser.password && allQuestions[sub.question_id]) {
-                    const rarity = allQuestions[sub.question_id].rarity 
-                        ? allQuestions[sub.question_id].rarity.toLowerCase().trim() 
-                        : 'common';
-                    if (currentUser.answeredRarities[rarity] !== undefined) {
-                        currentUser.answeredRarities[rarity]++;
+            // 1. Fetch past submissions
+            const subsRes = await fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`);
+            const allSubs = await subsRes.json();
+            currentUser.globalQuestionUses = {};
+            
+            if (allSubs) {
+                Object.values(allSubs).forEach(sub => {
+                    if (sub.student_password === currentUser.password) {
+                        currentUser.answeredQuestions.add(sub.question_id);
                     }
-                }
-            });
-        }
-                    // --- NEW: Calculate Local Stats for Finish Screen ---
-        currentUser.correctCount = 0;
-        currentUser.rawScore = 0;
-        const RARITY_POINTS = { common: 10, rare: 25, epic: 50, legendary: 100, mythic: 250 };
-
-        if (allQuestions && allSubs) {
-            Object.values(allSubs).forEach(sub => {
-                if (sub.student_password === currentUser.password) {
                     const qId = sub.question_id;
-                    const q = allQuestions[qId];
-                    
-                    // Track rarity
-                    if (q) {
-                        const rarity = q.rarity ? q.rarity.toLowerCase().trim() : 'common';
-                        if (currentUser.answeredRarities[rarity] !== undefined) {
-                            currentUser.answeredRarities[rarity]++;
-                        }
+                    currentUser.globalQuestionUses[qId] = (currentUser.globalQuestionUses[qId] || 0) + 1;
+                });
+            }
 
-                        // Check if correct and add score (ignore bombs for score)
-                        if (q.chest_type !== 'bomb' && sub.selected_answer === q.correct_answer) {
-                            currentUser.correctCount++;
-                            currentUser.rawScore += (RARITY_POINTS[rarity] || 10);
+            // 2. Fetch Questions & Calculate Progress (Excluding Hints)
+            const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
+            const allQuestions = await questionsRes.json();
+            
+            currentUser.totalQuestions = 0;
+            currentUser.questionMaxUses = {};
+            if (allQuestions) {
+                for (const [qId, q] of Object.entries(allQuestions)) {
+                    if (q.chest_type === 'hint') continue; // Skip hints!
+                    currentUser.totalQuestions++;
+                    currentUser.questionMaxUses[qId] = q.max_uses || 99;
+                }
+            }
+
+            // 3. Calculate Local Stats for Finish Screen
+            currentUser.correctCount = 0;
+            currentUser.rawScore = 0;
+            currentUser.answeredRarities = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
+            const RARITY_POINTS = { common: 10, rare: 25, epic: 50, legendary: 100, mythic: 250 };
+
+            if (allQuestions && allSubs) {
+                Object.values(allSubs).forEach(sub => {
+                    if (sub.student_password === currentUser.password) {
+                        const qId = sub.question_id;
+                        const q = allQuestions[qId];
+                        if (q) {
+                            const rarity = q.rarity ? q.rarity.toLowerCase().trim() : 'common';
+                            if (currentUser.answeredRarities[rarity] !== undefined) {
+                                currentUser.answeredRarities[rarity]++;
+                            }
+                            if (q.chest_type !== 'bomb' && sub.selected_answer === q.correct_answer) {
+                                currentUser.correctCount++;
+                                currentUser.rawScore += (RARITY_POINTS[rarity] || 10);
+                            }
                         }
                     }
-                }
-            });
-        }
-
-        displayName.textContent = currentUser.name;
-        displayClass.textContent = currentUser.class;
-        
-        await checkGameStatusAndUpdateTimer(); 
-        
-        // --- NEW: Check if already finished ---
-                // --- Check if already finished personally ---
-        let resolvedChests = 0;
-        if (currentUser.questionMaxUses) {
-            for (const [qId, maxUses] of Object.entries(currentUser.questionMaxUses)) {
-                const openedByMe = currentUser.answeredQuestions.has(qId);
-                const claimedGlobally = (currentUser.globalQuestionUses[qId] || 0) >= maxUses;
-                if (openedByMe || claimedGlobally) resolvedChests++;
+                });
             }
-        }
 
-        const isFinished = resolvedChests >= currentUser.totalQuestions && currentUser.totalQuestions > 0;
+            // 4. Check if already finished personally
+            let resolvedChests = 0;
+            if (currentUser.questionMaxUses) {
+                for (const [qId, maxUses] of Object.entries(currentUser.questionMaxUses)) {
+                    const openedByMe = currentUser.answeredQuestions.has(qId);
+                    const claimedGlobally = (currentUser.globalQuestionUses[qId] || 0) >= maxUses;
+                    if (openedByMe || claimedGlobally) resolvedChests++;
+                }
+            }
+            const isFinished = resolvedChests >= currentUser.totalQuestions && currentUser.totalQuestions > 0;
 
-        if (isFinished) {
-            showFinishScreen();
-        } else if (isGameActive) {
-            showScreen(studentDashboard);
-            updateProgressTracker(); 
-            startStudentTimer(); 
-            startScanner();
-            startAnnouncementPolling(); 
-        } else {
-            showGameOver();
-        }
-
+            // 5. Route to correct screen
             displayName.textContent = currentUser.name;
             displayClass.textContent = currentUser.class;
-            
-            // Check game status before entering (Functions defined in student.js)
             await checkGameStatusAndUpdateTimer(); 
-            if (isGameActive) {
+
+            if (isFinished) {
+                showFinishScreen();
+            } else if (isGameActive) {
                 showScreen(studentDashboard);
-                updateProgressTracker(); // From student.js
+                updateProgressTracker(); 
                 startStudentTimer(); 
-                startScanner(); 
+                startScanner();
+                startAnnouncementPolling(); 
             } else {
                 showGameOver();
             }
@@ -216,7 +174,7 @@ function handleLogout() {
         }).catch(err => console.log(err));
     }
 
-    // --- FIX: Force-hide ALL overlays so they don't bleed into the login screen ---
+    // FIX: Force-hide ALL overlays so they don't bleed into the login screen
     const overlaysToHide = [
         'finish-overlay', 
         'parchment-overlay', 
@@ -224,19 +182,16 @@ function handleLogout() {
         'scroll-overlay', 
         'bomb-overlay', 
         'locked-overlay',
+        'hint-overlay', // Added Hint Overlay
+        'secret-code-modal', // Added Secret Code Modal
         'game-over-overlay'
     ];
-    
     overlaysToHide.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
-    // --------------------------------------------------------------------------------
 
     showScreen(loginScreen);
-    
-    // Bonus: Clear the password field
-    const passwordInput = document.getElementById('password-input');
     if (passwordInput) passwordInput.value = '';
 }
 

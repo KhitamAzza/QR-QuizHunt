@@ -45,12 +45,29 @@
                 <h3>Scan QR Code</h3>
                 <div id="reader"></div>
                 
-                <div class="manual-entry">
+                <div class="manual-entry hidden">
                     <p>Or type Question ID manually:</p>
                     <input type="text" id="manual-qr-input" placeholder="e.g., Q001">
                     <button id="manual-submit-btn" class="btn-primary">Submit</button>
                 </div>
             </div>
+                <!-- Secret Code Button -->
+    <button id="secret-code-btn" class="btn-primary" style="width: auto; margin: 20px auto; display: block; padding: 10px 20px;">
+        🔑 Input Secret Code
+    </button>
+
+    <!-- Secret Code Modal -->
+    <div id="secret-code-modal" class="secret-code-modal hidden">
+        <div class="secret-code-content">
+            <h3>Enter Secret Code</h3>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">Bypass the QR scanner and unlock a chest directly.</p>
+            <input type="text" id="secret-code-input" placeholder="e.g., Q001">
+            <div class="secret-code-actions">
+                <button id="secret-code-submit" class="btn-primary" style="margin-top:0;">Unlock</button>
+                <button id="secret-code-cancel" class="btn-logout" style="margin-top:0;">Cancel</button>
+            </div>
+        </div>
+    </div>
 
             <!-- Question Modal (Fallback only) -->
             <div id="question-modal" class="question-modal hidden">
@@ -194,6 +211,18 @@
             <h2>🔒 CHEST LOCKED!</h2>
             <p>This chest has already been claimed by another student.</p>
             <button id="locked-back-btn" class="option-btn" style="background-color: #9c2b23; color: white; border: 2px solid white; margin-top: 20px;">Return to Scanner</button>
+        </div>
+    </div>
+        <!-- HINT CHEST OVERLAY -->
+    <div id="hint-overlay" class="hint-overlay hidden">
+        <img src="assets/parchment_unrolled.png" alt="Parchment" class="parchment-bg">
+        <div class="hint-content">
+            <h2>💡 HINT SCROLL</h2>
+            <p id="hint-text">Loading hint...</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button id="hint-back-btn" class="option-btn" style="width: auto; padding: 10px 20px; margin-top: 15px;">Back to Scanner</button>
+                <button id="hint-logout-btn" class="btn-logout" style="width: auto; padding: 10px 20px; margin-top: 15px;">Return to Login</button>
+            </div>
         </div>
     </div>
 

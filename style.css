@@ -549,3 +549,45 @@ MOBILE OPTIMIZATION FOR PARCHMENT
         font-size: 0.6rem; /* Reduced from 0.7rem */
     }
 }
+/* ==========================================
+SECRET CODE MODAL & HINT OVERLAY
+========================================== */
+.secret-code-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
+    z-index: 10001;
+}
+.secret-code-content {
+    background: var(--card-bg); padding: 30px; border-radius: 12px;
+    text-align: center; max-width: 90%; width: 350px;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+.secret-code-content h3 { color: var(--primary-color); margin-bottom: 10px; }
+.secret-code-content input {
+    width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd;
+    border-radius: 8px; margin-bottom: 15px; text-align: center;
+}
+.secret-code-actions { display: flex; gap: 10px; justify-content: center; }
+.secret-code-actions button { width: auto; flex: 1; }
+
+/* Hint Overlay */
+.hint-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(6,4,2,0.9); display: flex; justify-content: center; align-items: center;
+    z-index: 10000;
+}
+.hint-content {
+    position: absolute; top: 15%; left: 10%; width: 80%; height: 70%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px; box-sizing: border-box; text-align: center;
+}
+.hint-content h2 {
+    color: var(--ink-color); font-size: 1.8rem; margin-bottom: 15px;
+    font-family: 'Cinzel', serif; text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+}
+.hint-content p {
+    color: var(--ink-color); font-size: 1.2rem; line-height: 1.5;
+    font-family: 'IM Fell English', serif; font-weight: bold;
+    max-width: 90%; margin-bottom: 20px;
+}

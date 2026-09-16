@@ -223,7 +223,12 @@ async function startChestSequence(qData, rarity) {
  } else if (rarity === 'mythic') {
      await triggerAnnouncement(` ${currentUser.name} just opened the MYTHIC CHEST!`);
  }
-
+// --- NEW: CHECK FOR HINT ---
+ if (qData.chest_type === 'hint') {
+     chestOverlay.classList.add('hidden');
+     await playHintSequence(qData.text); // qData.text contains the hint info
+     return; // STOP HERE! Do not show scroll or parchment.
+ }
     // --- NEW: CHECK FOR BOMB ---
     if (qData.chest_type === 'bomb') {
         chestOverlay.classList.add('hidden'); // Hide the chest
@@ -562,6 +567,28 @@ function waitForTap(element) {
         element.addEventListener('touchstart', handler, { passive: false });
     });
 }
+async function playHintSequence(hintText) {
+    const hintOverlay = document.getElementById('hint-overlay');
+    const hintTextEl = document.getElementById('hint-text');
+    const hintBackBtn = document.getElementById('hint-back-btn');
+    const hintLogoutBtn = document.getElementById('hint-logout-btn');
+
+    // Show overlay and set text
+    hintOverlay.classList.remove('hidden');
+    if (hintTextEl) hintTextEl.textContent = hintText;
+
+    // Wait for them to tap either "Back to Scanner" or "Return to Login"
+    const tappedEl = await waitForAny([hintBackBtn, hintLogoutBtn]);
+
+    // Cleanup
+    hintOverlay.classList.add('hidden');
+
+    if (tappedEl === hintLogoutBtn) {
+        handleLogout();
+    } else {
+        resetToScanner();
+    }
+}
 
 // Races a tap/click across several elements at once (e.g. "chest" vs "back
 // button") and resolves with whichever element was actually tapped, cleaning
@@ -689,4 +716,36 @@ async function fetchLatestAnnouncement() {
             }).join('');
         }
     } catch (error) { /* Ignore silent fails */ }
+}
+// --- SECRET CODE MODAL LOGIC ---
+const secretCodeBtn = document.getElementById('secret-code-btn');
+const secretCodeModal = document.getElementById('secret-code-modal');
+const secretCodeInput = document.getElementById('secret-code-input');
+const secretCodeSubmit = document.getElementById('secret-code-submit');
+const secretCodeCancel = document.getElementById('secret-code-cancel');
+
+if (secretCodeBtn) {
+    secretCodeBtn.addEventListener('click', () => {
+        secretCodeModal.classList.remove('hidden');
+        secretCodeInput.value = '';
+        secretCodeInput.focus();
+    });
+}
+if (secretCodeCancel) {
+    secretCodeCancel.addEventListener('click', () => secretCodeModal.classList.add('hidden'));
+}
+if (secretCodeSubmit) {
+    secretCodeSubmit.addEventListener('click', () => {
+        const qId = secretCodeInput.value.trim();
+        if (qId) {
+            secretCodeModal.classList.add('hidden');
+            loadQuestion(qId);
+        }
+    });
+}
+// Allow pressing "Enter" in the secret code input
+if (secretCodeInput) {
+    secretCodeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && secretCodeSubmit) secretCodeSubmit.click();
+    });
 }
