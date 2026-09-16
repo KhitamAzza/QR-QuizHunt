@@ -512,3 +512,40 @@ button:active { transform: scale(0.98); opacity: 0.9; }
     text-align: center;
     width: 100%;
 }
+/* ==========================================
+MOBILE OPTIMIZATION FOR PARCHMENT
+========================================== */
+@media (max-width: 600px) {
+    /* Reduce content area height to fit smaller screens */
+    .parchment-content {
+        top: 15%;
+        height: 70%;
+        padding: 5px;
+    }
+    
+    /* Make question text smaller on mobile */
+    .parchment-content h3 {
+        font-size: 1rem; /* Reduced from 1.2rem */
+        margin: 8px 0;
+        line-height: 1.2;
+    }
+    
+    /* Make buttons smaller on mobile */
+    .parchment-content .option-btn {
+        font-size: 0.95rem; /* Reduced from 1.2rem */
+        padding: 6px 10px;
+        margin-top: 4px;
+    }
+    
+    /* Make rarity badge smaller */
+    .parchment-rarity-badge {
+        font-size: 0.5rem; /* Reduced from 0.6rem */
+        padding: 2px 6px;
+        margin-bottom: 8px;
+    }
+    
+    /* Make timer text smaller */
+    .parchment-timer-text {
+        font-size: 0.6rem; /* Reduced from 0.7rem */
+    }
+}
