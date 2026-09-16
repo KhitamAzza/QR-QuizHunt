@@ -118,14 +118,15 @@ async function calculateAndRenderLeaderboard() {
         const questions = questionsRes || {};
         const submissions = submissionsRes ? Object.values(submissionsRes) : [];
 
-        // 1. Calculate Max Score (Skipping Bombs)
-        let maxPossibleScore = 0;
-        for (const qId in questions) {
-            const q = questions[qId];
-            if (q && (q.chest_type === 'bomb' || q.chest_type === 'hint')) continue; // Hints are worth 0, never count toward the max score
-            const rarity = q.rarity ? q.rarity.toLowerCase().trim() : 'common';
-            maxPossibleScore += (RARITY_POINTS[rarity] || 10);
-        }
+             // 1. Calculate Max Score (Skipping Bombs and Hints)
+     let maxPossibleScore = 0;
+     for (const qId in questions) {
+         const q = questions[qId];
+         // Skip optional chests so they don't inflate the max possible score
+         if (q && (q.chest_type === 'bomb' || q.chest_type === 'hint')) continue; 
+         const rarity = q.rarity ? q.rarity.toLowerCase().trim() : 'common';
+         maxPossibleScore += (RARITY_POINTS[rarity] || 10);
+     }
         if (maxPossibleScore === 0) maxPossibleScore = 1; 
         currentMaxScore = maxPossibleScore;
 

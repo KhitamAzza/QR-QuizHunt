@@ -85,19 +85,19 @@ loginBtn.addEventListener('click', async () => {
                 });
             }
 
-            // 2. Fetch Questions & Calculate Progress (Excluding Hints)
-            const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
-            const allQuestions = await questionsRes.json();
-            
-            currentUser.totalQuestions = 0;
-            currentUser.questionMaxUses = {};
-            if (allQuestions) {
-                for (const [qId, q] of Object.entries(allQuestions)) {
-                    if (q.chest_type === 'hint') continue; // Skip hints!
-                    currentUser.totalQuestions++;
-                    currentUser.questionMaxUses[qId] = q.max_uses || 99;
-                }
-            }
+                     // 2. Fetch Questions & Calculate Progress (Excluding Hints AND Bombs)
+         const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
+         const allQuestions = await questionsRes.json();
+         currentUser.totalQuestions = 0;
+         currentUser.questionMaxUses = {};
+         if (allQuestions) {
+             for (const [qId, q] of Object.entries(allQuestions)) {
+                 // Skip hints and bombs! They are optional events, not required objectives.
+                 if (q.chest_type === 'hint' || q.chest_type === 'bomb') continue; 
+                 currentUser.totalQuestions++;
+                 currentUser.questionMaxUses[qId] = q.max_uses || 99;
+             }
+         }
 
             // 3. Calculate Local Stats for Finish Screen
             currentUser.correctCount = 0;
