@@ -639,6 +639,7 @@ function showFinishScreen() {
     const finishScore = document.getElementById('finish-score');
     const finishAccuracy = document.getElementById('finish-accuracy');
     const finishQuestions = document.getElementById('finish-questions');
+    const finishRank = document.getElementById('finish-rank'); // Add this
     const finishLogoutBtn = document.getElementById('finish-logout-btn');
 
     // Calculate Accuracy
@@ -646,20 +647,46 @@ function showFinishScreen() {
         ? Math.round((currentUser.correctCount / currentUser.totalQuestions) * 100) 
         : 0;
 
+    // Calculate Rank
+    const maxScore = currentUser.maxPossibleScore || 1;
+    const percentage = (currentUser.rawScore / maxScore) * 100;
+    
+    let rankText = "F-Rank";
+    let rankColor = "#f44336";
+
+    if (percentage >= 90) {
+        rankText = "🏆 S-Rank";
+        rankColor = "#FFD700";
+    } else if (percentage >= 80) {
+        rankText = " A-Rank";
+        rankColor = "#4CAF50";
+    } else if (percentage >= 70) {
+        rankText = "🥈 B-Rank";
+        rankColor = "#2196F3";
+    } else if (percentage >= 60) {
+        rankText = "🥉 C-Rank";
+        rankColor = "#FF9800";
+    }
+
     // Update UI
     if(finishScore) finishScore.textContent = currentUser.rawScore;
     if(finishAccuracy) finishAccuracy.textContent = accuracy + '%';
     if(finishQuestions) finishQuestions.textContent = `${currentUser.answeredQuestions.size} / ${currentUser.totalQuestions}`;
+    
+    // Update Rank
+    if(finishRank) {
+        finishRank.textContent = rankText;
+        finishRank.style.color = rankColor;
+    }
 
     // Show Overlay
     if(finishOverlay) finishOverlay.classList.remove('hidden');
 
-    // NEW: Attach logout event to the finish screen button
+    // Attach logout event
     if(finishLogoutBtn) {
         finishLogoutBtn.onclick = handleLogout; 
     }
 }
-
 // Trigger Global Announcement
 async function triggerAnnouncement(message) {
     try {

@@ -226,28 +226,33 @@
         </div>
     </div>
 
-    <!-- FINISH OVERLAY -->
     <div id="finish-overlay" class="finish-overlay hidden">
-        <div class="finish-content">
-            <h1> MISI Selesai </h1>
-            <p>Kamu sudah menemukan semua harta Qrun!</p>
+    <div class="finish-content">
+        <h1>Quiz Selesai!</h1>
+        <p>Kamu sudah menemukan semua harta!</p>
             <div class="stats-grid">
-                <div class="stat-box">
-                    <h3>Final Score</h3>
-                    <p id="finish-score">0</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Akurasi</h3>
-                    <p id="finish-accuracy">0%</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Pertanyaan</h3>
-                    <p id="finish-questions">0/0</p>
-                </div>
+            <div class="stat-box">
+                <h3>Score akhir</h3>
+                <p id="finish-score">0</p>
             </div>
-            <button id="finish-logout-btn" class="btn-logout" style="margin-top: 20px; width: auto; padding: 12px 24px;">Return to Login</button>
+            <div class="stat-box">
+                <h3>Akurasi</h3>
+                <p id="finish-accuracy">0%</p>
+            </div>
+            <div class="stat-box">
+                <h3>Soal</h3>
+                <p id="finish-questions">0/0</p>
+            </div>
+            <!-- Arcade Rank MUST be inside stats-grid -->
+            <div class="stat-box">
+                <h3>Rank</h3>
+                <p id="finish-rank" style="font-size: 1.3rem;">F-Rank</p>
+            </div>
         </div>
+
+        <button id="finish-logout-btn" class="btn-logout" style="margin-top: 20px; width: auto; padding: 12px 24px;">Return to Login</button>
     </div>
+</div>
 
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="core.js"></script>

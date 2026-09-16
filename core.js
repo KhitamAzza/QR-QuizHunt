@@ -70,7 +70,7 @@ loginBtn.addEventListener('click', async () => {
                 answeredQuestions: new Set() 
             };
 
-            // 1. Fetch past submissions
+            // 1. Fetch past submissions to track personal answers and global uses
             const subsRes = await fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`);
             const allSubs = await subsRes.json();
             currentUser.globalQuestionUses = {};
@@ -85,19 +85,25 @@ loginBtn.addEventListener('click', async () => {
                 });
             }
 
-                     // 2. Fetch Questions & Calculate Progress (Excluding Hints AND Bombs)
-         const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
-         const allQuestions = await questionsRes.json();
-         currentUser.totalQuestions = 0;
-         currentUser.questionMaxUses = {};
-         if (allQuestions) {
-             for (const [qId, q] of Object.entries(allQuestions)) {
-                 // Skip hints and bombs! They are optional events, not required objectives.
-                 if (q.chest_type === 'hint' || q.chest_type === 'bomb') continue; 
-                 currentUser.totalQuestions++;
-                 currentUser.questionMaxUses[qId] = q.max_uses || 99;
-             }
-         }
+            // 2. Fetch Questions & Calculate Progress (Excluding Hints AND Bombs)
+            const questionsRes = await fetch(`${FIREBASE_URL}/questions.json?auth=${FIREBASE_SECRET}`);
+            const allQuestions = await questionsRes.json();
+            
+            currentUser.totalQuestions = 0;
+            currentUser.questionMaxUses = {};
+            
+            if (allQuestions) {
+                for (const [qId, q] of Object.entries(allQuestions)) {
+                    // Safely check chest type (defaults to 'reward' if missing or mistyped)
+                    const chestType = q.chest_type ? q.chest_type.toLowerCase().trim() : 'reward';
+                    
+                    // Skip hints and bombs! They are optional events, not required objectives.
+                    if (chestType === 'hint' || chestType === 'bomb') continue; 
+                    
+                    currentUser.totalQuestions++;
+                    currentUser.questionMaxUses[qId] = q.max_uses || 99;
+                }
+            }
 
             // 3. Calculate Local Stats for Finish Screen
             currentUser.correctCount = 0;
@@ -115,7 +121,10 @@ loginBtn.addEventListener('click', async () => {
                             if (currentUser.answeredRarities[rarity] !== undefined) {
                                 currentUser.answeredRarities[rarity]++;
                             }
-                            if (q.chest_type !== 'bomb' && sub.selected_answer === q.correct_answer) {
+                            
+                            const chestType = q.chest_type ? q.chest_type.toLowerCase().trim() : 'reward';
+                            // Only award points for correct answers on non-bomb chests
+                            if (chestType !== 'bomb' && sub.selected_answer === q.correct_answer) {
                                 currentUser.correctCount++;
                                 currentUser.rawScore += (RARITY_POINTS[rarity] || 10);
                             }
@@ -138,6 +147,8 @@ loginBtn.addEventListener('click', async () => {
             // 5. Route to correct screen
             displayName.textContent = currentUser.name;
             displayClass.textContent = currentUser.class;
+            
+            // Update game status BEFORE checking isGameActive
             await checkGameStatusAndUpdateTimer(); 
 
             if (isFinished) {

@@ -485,10 +485,41 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 }
 .finish-content h1 { color: var(--primary-color); text-shadow: 2px 2px 0 #000; font-size: 2rem; margin-bottom: 10px; }
 .finish-content p { color: var(--text-color); font-size: 1.1rem; margin-bottom: 20px; opacity: 0.85; }
-.stats-grid { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 20px; }
-.stat-box { background: #14100b; padding: 15px; border-radius: 6px; flex: 1; border: 2px solid var(--card-border); }
-.stat-box h3 { font-size: 0.8rem; color: var(--text-color); opacity: 0.7; margin-bottom: 5px; text-transform: uppercase; }
-.stat-box p { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin: 0; }
+.stats-grid { 
+    display: flex; 
+    justify-content: space-between; /* Changed from space-around */
+    gap: 8px; /* Reduced gap */
+    margin-bottom: 20px; 
+    flex-wrap: nowrap; /* Prevent wrapping */
+}
+.stat-box { 
+    background: #14100b; 
+    padding: 12px 8px; /* Reduced padding */
+    border-radius: 6px; 
+    flex: 1; /* Equal width for all boxes */
+    border: 2px solid var(--card-border);
+    text-align: center;
+    min-width: 0; /* Allow shrinking */
+}
+
+.stat-box h3 { 
+    font-size: 0.7rem; /* Smaller heading */
+    color: var(--text-color); 
+    opacity: 0.7; 
+    margin-bottom: 5px; 
+    text-transform: uppercase; 
+}
+
+.stat-box p { 
+    font-size: 1.2rem; /* Slightly smaller text */
+    font-weight: bold; 
+    color: var(--primary-color); 
+    margin: 0; 
+}
+#finish-rank {
+    font-size: 1.1rem !important;
+    line-height: 1.2;
+}
 /* ==========================================
    FIX: SCROLL & PARCHMENT INSTRUCTION POSITION
    ========================================== */
