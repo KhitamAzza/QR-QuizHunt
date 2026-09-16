@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scavenger Hunt Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- SCREEN 1: LOGIN -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <h1>🕵️ Scavenger Hunt</h1>
+            <p>Enter your Password to begin</p>
+            <input type="password" id="password-input" placeholder="Enter Password">
+            <button id="login-btn" class="btn-primary">Login</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: STUDENT DASHBOARD -->
+    <div id="student-dashboard" class="screen">
+        <header class="student-header">
+            <div class="user-info">
+                <h2 id="display-name">Student</h2>
+                <p id="display-class">Class</p>
+            </div>
+            <div id="student-timer" class="timer-badge">⏳ --:--</div>
+            <button id="logout-btn" class="btn-logout">Logout</button>
+        </header>
+        
+        <!-- Announcement Ticker -->
+        <div id="announcement-ticker" class="announcement-ticker hidden">
+            <span class="ticker-icon"></span>
+            <span id="announcement-text">Loading announcements...</span>
+            <button id="announcement-history-toggle" type="button">📜 History</button>
+            <div id="announcement-history-dropdown" class="hidden"></div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div id="progress-tracker" class="progress-tracker"></div>
+        
+        <main class="student-main">
+            <!-- Scanner Area -->
+            <div class="scanner-container" id="scanner-area">
+                <h3>Scan QR Code</h3>
+                <div id="reader"></div>
+                
+                <div class="manual-entry">
+                    <p>Or type Question ID manually:</p>
+                    <input type="text" id="manual-qr-input" placeholder="e.g., Q001">
+                    <button id="manual-submit-btn" class="btn-primary">Submit</button>
+                </div>
+            </div>
+
+            <!-- Question Modal (Fallback only) -->
+            <div id="question-modal" class="question-modal hidden">
+                <h3 id="q-text">Question goes here?</h3>
+                <div id="q-options" class="options-grid"></div>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="feedback hidden">
+                <p id="feedback-text">Answer Recorded!</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- SCREEN 3: TEACHER DASHBOARD (TABBED) -->
+    <div id="teacher-dashboard" class="screen">
+        <header class="teacher-header">
+            <h1>🕹️ Teacher Control Panel</h1>
+            <button id="teacher-logout-btn" class="btn-logout">Logout</button>
+        </header>
+        
+        <main class="teacher-main">
+            <!-- Tab Navigation -->
+            <div class="teacher-tabs">
+                <button class="tab-btn active-tab" data-tab="tab-controls">🎮 Game Controls</button>
+                <button class="tab-btn" data-tab="tab-leaderboard">🏆 Leaderboard & Export</button>
+                <button class="tab-btn" data-tab="tab-data">⚙️ Data Management</button>
+            </div>
+
+            <!-- Tab 1: Game Controls -->
+            <div id="tab-controls" class="tab-content active-tab-content">
+                <div class="control-panel">
+                    <h2>⏱️ Game Timer & Status</h2>
+                    <div class="control-row">
+                        <label>Duration (mins):</label>
+                        <input type="number" id="game-duration" value="60" min="1">
+                        <button id="start-game-btn" class="btn-primary" style="width:auto; margin-top:0;">▶️ Start Game</button>
+                        <button id="stop-game-btn" class="btn-logout" style="width:auto; margin-top:0;">️ End Early</button>
+                    </div>
+                    <p id="game-status-text" style="margin-top: 15px; font-weight: bold; font-size: 1.1rem;">Status: Checking...</p>
+                </div>
+            </div>
+
+            <!-- Tab 2: Leaderboard & Export -->
+            <div id="tab-leaderboard" class="tab-content">
+                <div class="leaderboard-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <h2 style="margin-bottom: 0;">Live Leaderboard</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="refresh-scores-btn" class="btn-primary" style="width:auto; margin-top:0; padding: 10px 20px;">🔄 Refresh</button>
+                            <button id="export-sheets-btn" class="btn-primary" style="width:auto; margin-top:0; padding: 10px 20px; background-color: #4f7d6c;">📊 Export to Sheets</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Name</th>
+                                    <th>Class</th>
+                                    <th>Raw Score</th>
+                                    <th>Final Grade</th>
+                                    <th>Arcade Rank</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body">
+                                <tr><td colspan="6">Loading scores...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Data Management -->
+            <div id="tab-data" class="tab-content">
+                <div class="control-panel" style="border: 2px dashed var(--danger-color);">
+                    <h2 style="color: var(--danger-color);">⚠️ Danger Zone</h2>
+                    <p style="margin-bottom: 15px; color: #666;">Use these tools carefully. Purging will wipe all student answers for the current session.</p>
+                    <button id="purge-submissions-btn" class="btn-logout" style="background-color: #ff9800; width: auto; padding: 12px 24px;">🗑️ Clear All Answers</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- GAME OVER OVERLAY -->
+    <div id="game-over-overlay" class="game-over-overlay hidden">
+        <h1>🏁 Game Over!</h1>
+        <p>The time limit has been reached or the teacher has ended the game.</p>
+        <button id="game-over-logout-btn" class="btn-logout" style="width:auto;">Return to Login</button>
+    </div>
+
+        <!-- CHEST OVERLAY -->
+    <div id="chest-overlay" class="chest-overlay hidden">
+        <div class="chest-container">
+            <!-- NEW: Suspense Text Area -->
+            <p id="chest-suspense-text" class="chest-suspense-text"></p>
+            
+            <img id="chest-sprite" src="assets/chest_closed.png" alt="Chest" class="chest-sprite">
+            <div id="chest-instruction" class="retro-instruction hidden">TAP TO OPEN!</div>
+            <button id="chest-back-btn" class="chest-back-btn hidden">️ Back to Scanner</button>
+        </div>
+        <div id="screen-flash" class="screen-flash hidden"></div>
+    </div>
+
+    <!-- SCROLL OVERLAY -->
+    <div id="scroll-overlay" class="scroll-overlay hidden">
+        <img id="folded-scroll-sprite" src="assets/scroll_rolled.png" alt="Folded Scroll" class="folded-scroll-sprite">
+        <div id="scroll-instruction" class="retro-instruction">TAP TO UNFOLD!</div>
+    </div>
+
+    <!-- PARCHMENT OVERLAY -->
+    <div id="parchment-overlay" class="parchment-overlay hidden">
+        <img src="assets/parchment_unrolled.png" alt="Parchment" class="parchment-bg">
+        <div id="parchment-instruction" class="retro-instruction hidden">TAP TO UNFOLD!</div>
+        <div id="parchment-content" class="parchment-content hidden">
+            <div id="parchment-rarity-badge" class="parchment-rarity-badge">MYTHIC</div>
+            <h3 id="parchment-q-text">Question goes here?</h3>
+            <div class="parchment-timer-container">
+                <div class="parchment-timer-bar"></div>
+                <span class="parchment-timer-text">10s</span>
+            </div>
+            <div class="options-grid" id="parchment-q-options"></div>
+        </div>
+    </div>
+
+    <!-- BOMB OVERLAY -->
+    <div id="bomb-overlay" class="bomb-overlay hidden">
+        <div class="bomb-container">
+            <img id="bomb-sprite" src="assets/bomb_1.png" alt="Bomb" class="bomb-sprite">
+        </div>
+        <div id="bomb-flash" class="bomb-flash hidden"></div>
+        <div id="bomb-message" class="bomb-message hidden">
+            <h2>💥 BOMB TRIGGERED!</h2>
+            <p>Score: -30 Points</p>
+        </div>
+    </div>
+
+    <!-- LOCKED CHEST OVERLAY -->
+    <div id="locked-overlay" class="locked-overlay hidden">
+        <div class="locked-content">
+            <h2>🔒 CHEST LOCKED!</h2>
+            <p>This chest has already been claimed by another student.</p>
+            <button id="locked-back-btn" class="option-btn" style="background-color: #9c2b23; color: white; border: 2px solid white; margin-top: 20px;">Return to Scanner</button>
+        </div>
+    </div>
+
+    <!-- FINISH OVERLAY -->
+    <div id="finish-overlay" class="finish-overlay hidden">
+        <div class="finish-content">
+            <h1>🏆 QUEST COMPLETE! 🏆</h1>
+            <p>You have explored every corner and opened every chest!</p>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3>Final Score</h3>
+                    <p id="finish-score">0</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Accuracy</h3>
+                    <p id="finish-accuracy">0%</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Questions</h3>
+                    <p id="finish-questions">0/0</p>
+                </div>
+            </div>
+            <button id="finish-logout-btn" class="btn-logout" style="margin-top: 20px; width: auto; padding: 12px 24px;">Return to Login</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="core.js"></script>
+    <script src="student.js"></script>
+    <script src="teacher.js"></script>
+</body>
+</html>
