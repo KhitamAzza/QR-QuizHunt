@@ -127,7 +127,7 @@ async function loadQuestion(questionId) {
         scannerArea.classList.add('hidden');
         feedbackArea.classList.add('hidden');
         questionModal.classList.remove('hidden');
-        qText.textContent = `⚠️ You have already answered "${questionId}"!`;
+        qText.textContent = `⚠️ Kamu sudah menjawab soal ini "${questionId}"!`;
         qText.style.color = "#f44336";
         qOptions.innerHTML = `<button class="option-btn" style="background-color:#4CAF50;" onclick="resetToScanner()">Back to Scanner</button>`;
         return;
@@ -141,7 +141,7 @@ async function loadQuestion(questionId) {
     try {
         const response = await fetch(`${FIREBASE_URL}/questions/${questionId}.json?auth=${FIREBASE_SECRET}`);
         const qData = await response.json();
-        if (!qData || !qData.text) throw new Error("Question data is empty or ID is wrong");
+        if (!qData || !qData.text) throw new Error("Kode sakti tidak ditemukan!");
 
         const rarity = qData.rarity ? qData.rarity.toLowerCase().trim() : 'common';
         
@@ -185,7 +185,7 @@ async function startChestSequence(qData, rarity) {
     // 2. Show glowing chest & wait for tap (or let the student back off)
     chestSprite.src = 'assets/chest_locked_glow.png';
     chestSprite.classList.add('chest-glow-effect');
-    chestInstruction.textContent = "TAP TO OPEN!";
+    chestInstruction.textContent = "TAP untuk BUKA";
     chestInstruction.classList.remove('hidden');
 
     const chestBackBtn = document.getElementById('chest-back-btn');
@@ -219,9 +219,9 @@ async function startChestSequence(qData, rarity) {
     await sleep(800); 
      // --- NEW: TRIGGER GLOBAL ANNOUNCEMENTS ---
  if (qData.chest_type === 'bomb') {
-     await triggerAnnouncement(`💥 ${currentUser.name} just triggered a BOMB TRAP!`);
+     await triggerAnnouncement(`💥 ${currentUser.name} Membuka kotak BOMB!`);
  } else if (rarity === 'mythic') {
-     await triggerAnnouncement(` ${currentUser.name} just opened the MYTHIC CHEST!`);
+     await triggerAnnouncement(`💎${currentUser.name} Menemukan harta Mythic!`);
  }
 // --- NEW: CHECK FOR HINT ---
  if (qData.chest_type === 'hint') {
@@ -327,7 +327,7 @@ function handleTimeUp(source) {
         const rpgQOptions = document.getElementById('parchment-q-options');
         
         if(rpgQText) {
-            rpgQText.textContent = "⏰ TIME'S UP!";
+            rpgQText.textContent = "WAKTU HABIS!";
             rpgQText.classList.add('time-up-text');
         }
         if(rpgQOptions) rpgQOptions.innerHTML = ''; 
@@ -395,7 +395,7 @@ async function submitAnswer(selectedOption, source = 'parchment') {
         // Stay on the parchment — show the confirmation right there instead
         // of closing it and popping up the separate feedback banner.
         if (rpgQText) {
-            rpgQText.textContent = `✅ Answer for ${currentQuestionId} Recorded!`;
+            rpgQText.textContent = `Jawaban ${currentQuestionId} disimpan!`;
             rpgQText.classList.remove('time-up-text');
         }
         if (rpgQOptions) rpgQOptions.innerHTML = '';
@@ -404,7 +404,7 @@ async function submitAnswer(selectedOption, source = 'parchment') {
 
     } catch (error) {
         console.error("Submission error:", error);
-        if(rpgQText) rpgQText.textContent = "❌ Failed. Tap to retry.";
+        if(rpgQText) rpgQText.textContent = "Gagal, tap untuk ulangi.";
         if(rpgQOptions) rpgQOptions.innerHTML = `<button class="option-btn" onclick="loadQuestion('${currentQuestionId}')">Retry</button>`;
     }
 }
@@ -447,7 +447,7 @@ function updateProgressTracker() {
 
     progressTracker.innerHTML = `
         <div class="progress-header">
-            <span>🏆 Hunt Progress</span>
+            <span>Soal ditemukan</span>
             <span>${resolvedChests} / ${total} Chests</span>
         </div>
         <div class="progress-bar-container ${isComplete ? 'progress-complete' : ''}">
