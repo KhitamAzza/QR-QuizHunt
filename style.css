@@ -287,7 +287,7 @@ button:active { transform: scale(0.98); opacity: 0.9; }
 }
 
 .chest-container { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.chest-sprite { width: 415px; height: auto; image-rendering: pixelated; z-index: 2; cursor: pointer; transition: transform 0.2s ease; }
+.chest-sprite { width: 300px; height: auto; image-rendering: pixelated; z-index: 2; cursor: pointer; transition: transform 0.2s ease; }
 .chest-sprite:hover { transform: scale(1.05); }
 
 .chest-glow-effect { animation: retro-pulse 1s infinite alternate; }
@@ -349,7 +349,7 @@ button:active { transform: scale(0.98); opacity: 0.9; }
     min-height: 2em; 
     margin-top: 10px;
 }
-.folded-scroll-sprite { width: 390px; height: auto; image-rendering: pixelated; cursor: pointer; animation: floatScroll 2s ease-in-out infinite; }
+.folded-scroll-sprite { width: 320px; height: auto; image-rendering: pixelated; cursor: pointer; animation: floatScroll 2s ease-in-out infinite; }
 @keyframes floatScroll { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
 .parchment-bg { width: 100%; max-width: 530px; height: auto; image-rendering: pixelated; animation: unrollScroll 0.4s ease-out; }
