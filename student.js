@@ -120,6 +120,32 @@ manualSubmitBtn.addEventListener('click', () => {
 });
 
 // ==========================================
+// 3b. LIVE USAGE COUNTS
+// ==========================================
+// currentUser.globalQuestionUses starts as a one-time snapshot taken at
+// login (see core.js) and was previously only ever incremented locally for
+// this student's own answers. That meant it never learned about chests
+// other students claimed during the session, and a max_uses:1 chest could
+// end up opened more times than it should. This re-pulls the real counts
+// from Firebase on demand so the max_uses check is checked live instead.
+async function refreshGlobalQuestionUses() {
+    if (!currentUser) return;
+    try {
+        const subsRes = await fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`);
+        const allSubs = await subsRes.json();
+        const uses = {};
+        if (allSubs) {
+            Object.values(allSubs).forEach(sub => {
+                uses[sub.question_id] = (uses[sub.question_id] || 0) + 1;
+            });
+        }
+        currentUser.globalQuestionUses = uses;
+    } catch (error) {
+        console.error("Failed to refresh global question uses:", error);
+    }
+}
+
+// ==========================================
 // 4. QUESTION LOADING (ALL GO THROUGH CHEST)
 // ==========================================
 async function loadQuestion(questionId) {
@@ -149,8 +175,9 @@ async function loadQuestion(questionId) {
 
         const rarity = qData.rarity ? qData.rarity.toLowerCase().trim() : 'common';
         
-        // --- NEW: CHECK USAGE LIMIT ---
+        // --- CHECK USAGE LIMIT (live, not the stale login-time cache) ---
         const maxUses = qData.max_uses || 99; // Default to 99 if column is empty
+        await refreshGlobalQuestionUses();
         const currentUses = currentUser.globalQuestionUses[questionId] || 0;
 
         if (currentUses >= maxUses) {
@@ -370,8 +397,9 @@ async function submitAnswer(selectedOption, source = 'parchment') {
         if (!response.ok) throw new Error("Network response was not ok");
 
         currentUser.answeredQuestions.add(currentQuestionId);
-        // Update local global uses and check if personal hunt is over
-     currentUser.globalQuestionUses[currentQuestionId] = (currentUser.globalQuestionUses[currentQuestionId] || 0) + 1;
+        // Pull live global uses (picks up anything other students claimed too)
+        // and check if the personal hunt is over.
+        await refreshGlobalQuestionUses();
      updateProgressTracker();
      
      if (checkPersonalFinishCondition()) return; // Show finish screen and stop!
@@ -512,10 +540,10 @@ async function playBombSequence() {
          // 5. Record the penalty in Firebase
      await submitBombPenalty();
 
-     // FIX: Update local memory immediately so they can't trigger it again this session!
-       // FIX: Update local memory immediately so they can't trigger it again this session!
+     // Update local memory immediately so they can't trigger it again this session,
+     // and pull live counts so other students' bomb/answers are reflected too.
   currentUser.answeredQuestions.add(currentQuestionId);
-  currentUser.globalQuestionUses[currentQuestionId] = (currentUser.globalQuestionUses[currentQuestionId] || 0) + 1;
+  await refreshGlobalQuestionUses();
   
   // NEW: Update progress and check for personal finish
   updateProgressTracker();
