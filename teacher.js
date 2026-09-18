@@ -233,7 +233,8 @@ if (purgeSubmissionsBtn) {
         try {
             await Promise.all([
                 fetch(`${FIREBASE_URL}/submissions.json?auth=${FIREBASE_SECRET}`, { method: 'DELETE' }),
-                fetch(`${FIREBASE_URL}/announcements.json?auth=${FIREBASE_SECRET}`, { method: 'DELETE' })
+                fetch(`${FIREBASE_URL}/announcements.json?auth=${FIREBASE_SECRET}`, { method: 'DELETE' }),
+                fetch(`${FIREBASE_URL}/inventory.json?auth=${FIREBASE_SECRET}`, { method: 'DELETE' })
             ]);
             alert("✅ Answers & announcements cleared!"); calculateAndRenderLeaderboard();
         } catch (error) { alert("❌ Failed to clear."); }
